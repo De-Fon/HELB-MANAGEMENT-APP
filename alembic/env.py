@@ -22,6 +22,7 @@ from app.apps.subscription_manager import models
 from app.apps.scholarship_tracker import models
 from app.apps.offline_sync import models
 from app.apps.auth import models
+from app.apps.request_control import models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
