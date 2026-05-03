@@ -5,8 +5,15 @@ from app.apps.counselling.schemas import CounsellingBookingCreate
 from app.apps.counselling.models import CounsellingSession
 
 class CounsellingService:
-    def __init__(self, repository: CounsellingRepository):
+    def __init__(
+        self, 
+        repository: CounsellingRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def book_session(self, db: Session, data: CounsellingBookingCreate) -> CounsellingSession:
         allowed_types = ["money_management", "relationship_advice"]

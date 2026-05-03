@@ -1,30 +1,30 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func
-from datetime import datetime, timedelta
+from sqlalchemy import and_, update
+from datetime import timedelta
 from typing import Optional, Dict, Any
 from app.apps.request_control.models import IdempotencyRecord, RateLimitRecord
 from app.shared.utils import get_current_utc_time
 
 class RequestControlRepository:
-    def get_idempotency_record(
+    def get_idempotency(
         self, db: Session, key: str, user_id: int, endpoint: str
     ) -> Optional[IdempotencyRecord]:
-        now = get_current_utc_time()
+        """Fetch active idempotency record."""
         return db.query(IdempotencyRecord).filter(
             and_(
                 IdempotencyRecord.idempotency_key == key,
                 IdempotencyRecord.user_id == user_id,
                 IdempotencyRecord.endpoint == endpoint,
-                IdempotencyRecord.expires_at > now
+                IdempotencyRecord.expires_at > get_current_utc_time()
             )
         ).first()
 
-    def save_idempotency_record(
+    def create_idempotency(
         self, db: Session, key: str, user_id: int, endpoint: str, 
         status_code: int, response_body: Any, ttl_hours: int = 24
     ) -> IdempotencyRecord:
-        now = get_current_utc_time()
-        expires_at = now + timedelta(hours=ttl_hours)
+        """Create a new idempotency record with TTL."""
+        expires_at = get_current_utc_time() + timedelta(hours=ttl_hours)
         
         record = IdempotencyRecord(
             idempotency_key=key,
@@ -38,39 +38,39 @@ class RequestControlRepository:
         db.flush()
         return record
 
-    def increment_rate_limit(
-        self, db: Session, user_id: int, endpoint: str, window_seconds: int
-    ) -> Dict[str, Any]:
-        now = get_current_utc_time()
-        
-        # Check if there is an active window
-        record = db.query(RateLimitRecord).filter(
+    def get_active_rate_limit(
+        self, db: Session, user_id: int, endpoint: str
+    ) -> Optional[RateLimitRecord]:
+        """Fetch current active rate limit window."""
+        return db.query(RateLimitRecord).filter(
             and_(
                 RateLimitRecord.user_id == user_id,
                 RateLimitRecord.endpoint == endpoint,
-                RateLimitRecord.window_end > now
+                RateLimitRecord.window_end > get_current_utc_time()
             )
         ).first()
 
-        if record:
-            record.request_count += 1
-            db.flush()
-        else:
-            # Create new window
-            window_start = now
-            window_end = now + timedelta(seconds=window_seconds)
-            record = RateLimitRecord(
-                user_id=user_id,
-                endpoint=endpoint,
-                request_count=1,
-                window_start=window_start,
-                window_end=window_end
-            )
-            db.add(record)
-            db.flush()
+    def increment_rate_limit(self, db: Session, record_id: int):
+        """Atomsically increment the request count for a specific record."""
+        db.execute(
+            update(RateLimitRecord)
+            .where(RateLimitRecord.id == record_id)
+            .values(request_count=RateLimitRecord.request_count + 1)
+        )
+        db.flush()
 
-        return {
-            "count": record.request_count,
-            "window_start": record.window_start,
-            "window_end": record.window_end
-        }
+    def create_rate_limit_window(
+        self, db: Session, user_id: int, endpoint: str, window_seconds: int
+    ) -> RateLimitRecord:
+        """Initialize a new rate limit window."""
+        now = get_current_utc_time()
+        record = RateLimitRecord(
+            user_id=user_id,
+            endpoint=endpoint,
+            request_count=1,
+            window_start=now,
+            window_end=now + timedelta(seconds=window_seconds)
+        )
+        db.add(record)
+        db.flush()
+        return record

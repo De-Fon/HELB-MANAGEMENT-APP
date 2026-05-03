@@ -3,8 +3,15 @@ from typing import List, Dict
 from app.apps.offline_sync.repository import OfflineSyncRepository
 
 class OfflineSyncService:
-    def __init__(self, repository: OfflineSyncRepository):
+    def __init__(
+        self, 
+        repository: OfflineSyncRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def sync_queued_actions(self, db: Session, user_id: int) -> List[Dict]:
         unsynced = self.repository.get_unsynced_actions(db, user_id)

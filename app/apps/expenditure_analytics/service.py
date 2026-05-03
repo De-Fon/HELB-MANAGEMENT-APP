@@ -3,26 +3,31 @@ from app.apps.expenditure_analytics.repository import ExpenditureAnalyticsReposi
 from app.apps.expenditure_analytics.schemas import ExpenditureReport
 
 class ExpenditureAnalyticsService:
-    def __init__(self, repository: ExpenditureAnalyticsRepository):
+    def __init__(
+        self, 
+        repository: ExpenditureAnalyticsRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def generate_comparison_report(self, db: Session, user_id: int, month: int, year: int) -> ExpenditureReport:
-        user_data = self.repository.get_user_expenditure_by_month(db, user_id, month, year)
+        """
+        Generates a comparison report. 
+        Business logic handles the delta calculation between user totals and peer averages.
+        """
+        category_breakdown = self.repository.get_category_totals(db, user_id, month, year)
+        peer_averages = self.repository.get_global_averages(db, month, year)
         
-        category_breakdown = {}
-        total_spent = 0.0
-        
-        for record in user_data:
-            cat = record.category
-            category_breakdown[cat] = category_breakdown.get(cat, 0.0) + record.amount_spent
-            total_spent += record.amount_spent
-            
-        peer_averages = self.repository.get_global_average_by_category(db, month, year)
+        total_spent = sum(category_breakdown.values())
         
         peer_average_comparison = {}
+        # Ensure we compare all categories the user has spent in
         for cat, spent in category_breakdown.items():
             avg = peer_averages.get(cat, 0.0)
-            peer_average_comparison[cat] = spent - avg
+            peer_average_comparison[cat] = round(spent - avg, 2)
             
         return ExpenditureReport(
             user_id=user_id,

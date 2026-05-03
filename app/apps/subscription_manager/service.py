@@ -4,8 +4,15 @@ from typing import List, Dict
 from app.apps.subscription_manager.repository import SubscriptionRepository
 
 class SubscriptionService:
-    def __init__(self, repository: SubscriptionRepository):
+    def __init__(
+        self, 
+        repository: SubscriptionRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def check_and_alert_renewals(self, db: Session, user_id: int) -> List[Dict]:
         upcoming = self.repository.get_upcoming_renewals(db, user_id, days_ahead=7)

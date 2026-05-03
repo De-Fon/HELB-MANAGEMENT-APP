@@ -4,18 +4,20 @@ from app.apps.mpesa_integration.repository import MpesaTransactionRepository
 from app.apps.mpesa_integration.schemas import MpesaTransactionImport
 
 class MpesaTransactionService:
-    def __init__(self, repository: MpesaTransactionRepository):
+    def __init__(
+        self, 
+        repository: MpesaTransactionRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def sync_transactions(self, db: Session, user_id: int, transaction_list: List[MpesaTransactionImport]):
-        # Deduplicate list by transaction_id in memory first
-        seen_txns = set()
-        unique_txns = []
-        for txn in transaction_list:
-            if txn.transaction_id not in seen_txns and txn.user_id == user_id:
-                seen_txns.add(txn.transaction_id)
-                unique_txns.append(txn)
-                
-        imported = self.repository.bulk_import_transactions(db, unique_txns)
+        """
+        Syncs transactions by delegating deduplication and persistence to the repository.
+        """
+        imported = self.repository.bulk_upsert_transactions(db, user_id, transaction_list)
         db.commit()
         return imported

@@ -5,8 +5,15 @@ from app.apps.budget_tracker.schemas import BudgetAllocationCreate
 from app.apps.budget_tracker.models import BudgetAllocation
 
 class BudgetAllocationService:
-    def __init__(self, repository: BudgetAllocationRepository):
+    def __init__(
+        self, 
+        repository: BudgetAllocationRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def allocate_budget(self, db: Session, data: BudgetAllocationCreate) -> BudgetAllocation:
         total_allocations = (

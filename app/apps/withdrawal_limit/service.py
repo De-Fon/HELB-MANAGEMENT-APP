@@ -1,27 +1,42 @@
 from sqlalchemy.orm import Session
-from datetime import datetime
 from app.apps.withdrawal_limit.repository import WithdrawalLimitRepository
 from app.apps.withdrawal_limit.models import WithdrawalLimitSetting
+from app.shared.utils import get_current_utc_time
 from typing import Tuple
 
 class WithdrawalLimitService:
-    def __init__(self, repository: WithdrawalLimitRepository):
+    def __init__(
+        self, 
+        repository: WithdrawalLimitRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def check_withdrawal_eligibility(
         self, db: Session, user_id: int, requested_amount: float
     ) -> Tuple[bool, float, WithdrawalLimitSetting]:
-        limit = self.repository.get_or_create_limit(db, user_id)
+        """
+        Validates withdrawal eligibility. 
+        Handles daily rollover and concurrency using row-level locking.
+        """
+        limit = self.repository.get_limit_for_update(db, user_id)
         
-        # Reset logic if date has rolled over
-        today = datetime.now().date()
+        # Trigger daily reset if needed
+        today = get_current_utc_time().date()
         if limit.last_reset_date != today:
-            limit.current_daily_withdrawn = 0.0
-            limit.last_reset_date = today
+            self.repository.reset_daily_limit(db, limit)
 
         remaining = limit.daily_limit_amount - limit.current_daily_withdrawn
         eligible = requested_amount <= remaining
         
+        if eligible:
+            # Note: We don't update current_daily_withdrawn here yet 
+            # because this is just a 'check' endpoint. 
+            # But the row is locked for the duration of this transaction.
+            pass
+
         db.commit()
-        
         return eligible, remaining, limit

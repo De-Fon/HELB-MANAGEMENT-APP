@@ -4,8 +4,15 @@ from app.apps.expense_splitter.repository import ExpenseSplitterRepository
 from app.apps.expense_splitter.schemas import SharedExpenseCreate
 
 class ExpenseSplitterService:
-    def __init__(self, repository: ExpenseSplitterRepository):
+    def __init__(
+        self, 
+        repository: ExpenseSplitterRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def split_expense(self, db: Session, data: SharedExpenseCreate):
         if not data.split_among_user_ids:

@@ -4,8 +4,15 @@ from typing import List, Dict, Any
 from app.apps.scholarship_tracker.repository import ScholarshipRepository
 
 class ScholarshipService:
-    def __init__(self, repository: ScholarshipRepository):
+    def __init__(
+        self, 
+        repository: ScholarshipRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def get_eligible_scholarships(self, db: Session, user_profile_data: Dict[str, Any]) -> List[Dict]:
         today = date.today()

@@ -4,10 +4,21 @@ from app.apps.emergency_fund.repository import EmergencyFundRepository
 from app.apps.emergency_fund.models import EmergencyFund
 
 class EmergencyFundService:
-    def __init__(self, repository: EmergencyFundRepository):
+    def __init__(
+        self, 
+        repository: EmergencyFundRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def withdraw_from_emergency(self, db: Session, user_id: int, amount: float) -> EmergencyFund:
+        """
+        Withdraws from emergency fund. 
+        Uses row-level locking via repository to prevent race conditions.
+        """
         fund = self.repository.get_fund_for_update(db, user_id)
         if not fund:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Emergency fund not found.")
@@ -16,6 +27,7 @@ class EmergencyFundService:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient emergency funds.")
             
         new_balance = fund.remaining_amount - amount
-        updated_fund = self.repository.update_fund_balance(db, user_id, new_balance)
+        self.repository.update_balance(db, fund, new_balance)
+        
         db.commit()
-        return updated_fund
+        return fund

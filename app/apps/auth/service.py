@@ -7,8 +7,15 @@ from app.core.security import verify_password, create_access_token as generate_j
 from app.core.settings import settings
 
 class AuthService:
-    def __init__(self, repository: AuthRepository):
+    def __init__(
+        self, 
+        repository: AuthRepository,
+        idempotency_service=None,
+        rate_limit_service=None
+    ):
         self.repository = repository
+        self.idempotency_service = idempotency_service
+        self.rate_limit_service = rate_limit_service
 
     def register_user(self, db: Session, data: UserCreate) -> User:
         existing_user = self.repository.get_user_by_email_or_username(db, data.email)
