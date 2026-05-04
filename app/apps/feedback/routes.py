@@ -6,6 +6,8 @@ from app.apps.feedback.schemas import FeedbackCreate, FeedbackResponse
 from app.apps.feedback.service import FeedbackService
 from app.apps.feedback.providers import get_feedback_service
 from app.apps.request_control.dependencies import idempotent, rate_limit
+from app.apps.request_control.providers import get_request_control_service
+from app.apps.request_control.service import RequestControlService
 
 router = APIRouter()
 
@@ -21,7 +23,8 @@ def submit_feedback(
     request: Request,
     data: FeedbackCreate,
     db: Session = Depends(get_db),
-    service: FeedbackService = Depends(get_feedback_service)
+    service: FeedbackService = Depends(get_feedback_service),
+    rc_service: RequestControlService = Depends(get_request_control_service)
 ):
     """
     Submits student feedback regarding inflation and additional comments.

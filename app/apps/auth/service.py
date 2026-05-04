@@ -18,17 +18,29 @@ class AuthService:
         self.rate_limit_service = rate_limit_service
 
     def register_user(self, db: Session, data: UserCreate) -> User:
-        existing_user = self.repository.get_user_by_email_or_username(db, data.email)
-        if existing_user:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+        """
+        Registers a new user. 
+        Uses a robust 'Try-Create' pattern to handle potential race conditions
+        on unique constraints (email/username).
+        """
+        try:
+            user = self.repository.create_user(db, data)
+            db.commit()
+            return user
+        except Exception as e:
+            db.rollback()
+            # Check if it's a unique constraint violation
+            error_msg = str(e).lower()
+            if "email" in error_msg:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+            if "username" in error_msg:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken")
             
-        existing_username = self.repository.get_user_by_email_or_username(db, data.username)
-        if existing_username:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken")
-            
-        user = self.repository.create_user(db, data)
-        db.commit()
-        return user
+            # Generic error for other integrity issues
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail="Could not complete registration. Please try again."
+            )
 
     def authenticate_user(self, db: Session, data: UserLogin) -> User:
         user = self.repository.get_user_by_email_or_username(db, data.email_or_username)

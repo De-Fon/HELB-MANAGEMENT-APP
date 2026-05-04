@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from fastapi.encoders import jsonable_encoder
 from typing import Any, Tuple, Optional
 from app.apps.request_control.repository import RequestControlRepository
 from app.shared.utils import get_current_utc_time
@@ -21,9 +22,22 @@ class RequestControlService:
         self, db: Session, key: str, user_id: int, endpoint: str, 
         status_code: int, response_body: Any
     ):
-        """Stores the response of a successful request for future idempotency checks."""
+        """
+        Stores the response of a successful request for future idempotency checks.
+        Ensures SQLAlchemy models are refreshed before serialization.
+        """
+        # If it's a SQLAlchemy model, it might be expired after the service's db.commit().
+        # We refresh it to ensure jsonable_encoder can access its attributes.
+        if hasattr(response_body, "_sa_instance_state"):
+            try:
+                db.refresh(response_body)
+            except Exception:
+                pass # Already detached or session closed
+
+        serializable_body = jsonable_encoder(response_body)
+        
         self.repository.create_idempotency(
-            db, key, user_id, endpoint, status_code, response_body
+            db, key, user_id, endpoint, status_code, serializable_body
         )
         db.commit()
 

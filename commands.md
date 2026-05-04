@@ -53,28 +53,34 @@ This file contains every command you might need to run for this project, categor
 # alembic current
 ```
 
-## 4. Testing (Pytest)
+## 4. Testing & Verification
 ```bash
-# Run all tests
-# pytest
-
-# Run tests with verbose output
+# Run all tests (Pytest)
 # pytest -v
 
-# Run tests and show print statements (no capture)
-# pytest -s
+# Run the Request Control (Idempotency & Rate Limit) verification script
+# python3 scratch/test_request_control.py
+
+# Clear all rate limit records from the database (Useful for resetting tests)
+# python3 -c "from app.core.database import SessionLocal; from app.apps.request_control.models import RateLimitRecord; db=SessionLocal(); db.query(RateLimitRecord).delete(); db.commit(); print('Rate limits cleared!')"
 
 # Run a specific test file
 # pytest tests/test_filename.py
-
-# Run tests matching a specific keyword
-# pytest -k "keyword"
-
-# Run tests and stop immediately on first failure
-# pytest -x
 ```
 
-## 5. Maintenance & Utilities
+## 5. Logging & Monitoring
+```bash
+# View live application logs (General traffic)
+# tail -f logs/app-$(date +%Y-%m-%d).log
+
+# View live error logs (Database and system crashes)
+# tail -f logs/errors.log
+
+# Check the size of log files
+# ls -lh logs/
+```
+
+## 6. Maintenance & Utilities
 ```bash
 # Clean up Python cache files (__pycache__)
 # find . -type d -name "__pycache__" -exec rm -rf {} +
@@ -82,15 +88,11 @@ This file contains every command you might need to run for this project, categor
 # Export current dependencies to requirements.txt
 # pip freeze > requirements.txt
 
-# Check for security vulnerabilities in dependencies (requires 'safety' package)
+# Check for security vulnerabilities in dependencies
 # safety check
-
-# Linting and Formatting (if tools like black/ruff are installed)
-# black .
-# ruff check .
 ```
 
-## 6. Git Workflow (Common)
+## 7. Git Workflow (Common)
 ```bash
 # Check status
 # git status

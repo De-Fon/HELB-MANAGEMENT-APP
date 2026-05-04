@@ -24,6 +24,9 @@ class WithdrawalLimitService:
         """
         limit = self.repository.get_limit_for_update(db, user_id)
         
+        if not limit:
+            limit = self.repository.create_default_limit(db, user_id)
+        
         # Trigger daily reset if needed
         today = get_current_utc_time().date()
         if limit.last_reset_date != today:
@@ -32,11 +35,5 @@ class WithdrawalLimitService:
         remaining = limit.daily_limit_amount - limit.current_daily_withdrawn
         eligible = requested_amount <= remaining
         
-        if eligible:
-            # Note: We don't update current_daily_withdrawn here yet 
-            # because this is just a 'check' endpoint. 
-            # But the row is locked for the duration of this transaction.
-            pass
-
         db.commit()
         return eligible, remaining, limit

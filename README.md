@@ -21,6 +21,7 @@ This repository contains the foundational scaffolding for a scalable FastAPI bac
 │   └── main.py           # Application entry point
 ├── requirements.txt
 ├── .env
+├── LOGGING.md            # Logging system documentation
 └── README.md
 ```
 

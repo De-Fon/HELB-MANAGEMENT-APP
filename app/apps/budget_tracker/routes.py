@@ -6,6 +6,8 @@ from app.apps.budget_tracker.schemas import BudgetAllocationCreate, BudgetAlloca
 from app.apps.budget_tracker.service import BudgetAllocationService
 from app.apps.budget_tracker.providers import get_budget_allocation_service
 from app.apps.request_control.dependencies import idempotent, rate_limit
+from app.apps.request_control.providers import get_request_control_service
+from app.apps.request_control.service import RequestControlService
 
 router = APIRouter()
 
@@ -21,7 +23,8 @@ def create_allocation(
     request: Request,
     data: BudgetAllocationCreate,
     db: Session = Depends(get_db),
-    service: BudgetAllocationService = Depends(get_budget_allocation_service)
+    service: BudgetAllocationService = Depends(get_budget_allocation_service),
+    rc_service: RequestControlService = Depends(get_request_control_service)
 ):
     """
     Creates a new budget allocation, ensuring that the total allocations
