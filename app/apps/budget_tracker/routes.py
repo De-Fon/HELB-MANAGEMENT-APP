@@ -5,9 +5,12 @@ from app.core.database import get_db
 from app.apps.budget_tracker.schemas import BudgetAllocationCreate, BudgetAllocationResponse
 from app.apps.budget_tracker.service import BudgetAllocationService
 from app.apps.budget_tracker.providers import get_budget_allocation_service
-from app.apps.request_control.dependencies import idempotent, rate_limit
-from app.apps.request_control.providers import get_request_control_service
-from app.apps.request_control.service import RequestControlService
+from app.apps.idempotency.dependencies import idempotent
+from app.apps.rate_limiting.dependencies import rate_limit
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
+from app.apps.idempotency.service import IdempotencyService
+from app.apps.rate_limiting.service import RateLimitService
 
 router = APIRouter()
 
@@ -24,7 +27,8 @@ def create_allocation(
     data: BudgetAllocationCreate,
     db: Session = Depends(get_db),
     service: BudgetAllocationService = Depends(get_budget_allocation_service),
-    rc_service: RequestControlService = Depends(get_request_control_service)
+    idempotency_service: IdempotencyService = Depends(get_idempotency_service),
+    rate_limit_service: RateLimitService = Depends(get_rate_limit_service)
 ):
     """
     Creates a new budget allocation, ensuring that the total allocations

@@ -7,7 +7,8 @@ from app.core.settings import settings
 from app.apps.auth.repository import AuthRepository
 from app.apps.auth.service import AuthService
 from app.apps.auth.models import User
-from app.apps.request_control.providers import get_idempotency_service, get_rate_limit_service
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 

@@ -1,7 +1,8 @@
 from fastapi import Depends
 from app.apps.mpesa_integration.repository import MpesaTransactionRepository
 from app.apps.mpesa_integration.service import MpesaTransactionService
-from app.apps.request_control.providers import get_idempotency_service, get_rate_limit_service
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
 
 def get_mpesa_repository() -> MpesaTransactionRepository:
     return MpesaTransactionRepository()

@@ -4,9 +4,12 @@ from app.core.database import get_db
 from app.apps.expense_splitter.schemas import SharedExpenseCreate, SharedExpenseResponse
 from app.apps.expense_splitter.service import ExpenseSplitterService
 from app.apps.expense_splitter.providers import get_expense_splitter_service
-from app.apps.request_control.dependencies import idempotent, rate_limit
-from app.apps.request_control.providers import get_request_control_service
-from app.apps.request_control.service import RequestControlService
+from app.apps.idempotency.dependencies import idempotent
+from app.apps.rate_limiting.dependencies import rate_limit
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
+from app.apps.idempotency.service import IdempotencyService
+from app.apps.rate_limiting.service import RateLimitService
 
 router = APIRouter()
 
@@ -23,7 +26,8 @@ def add_shared_expense(
     data: SharedExpenseCreate,
     db: Session = Depends(get_db),
     service: ExpenseSplitterService = Depends(get_expense_splitter_service),
-    rc_service: RequestControlService = Depends(get_request_control_service)
+    idempotency_service: IdempotencyService = Depends(get_idempotency_service),
+    rate_limit_service: RateLimitService = Depends(get_rate_limit_service)
 ):
     """
     Creates a new shared expense and calculates the balance sheet.

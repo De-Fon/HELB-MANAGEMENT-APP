@@ -1,7 +1,8 @@
 from fastapi import Depends
 from app.apps.offline_sync.repository import OfflineSyncRepository
 from app.apps.offline_sync.service import OfflineSyncService
-from app.apps.request_control.providers import get_idempotency_service, get_rate_limit_service
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
 
 def get_offline_sync_repository() -> OfflineSyncRepository:
     return OfflineSyncRepository()

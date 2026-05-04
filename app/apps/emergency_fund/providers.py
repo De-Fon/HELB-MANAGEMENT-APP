@@ -1,7 +1,8 @@
 from fastapi import Depends
 from app.apps.emergency_fund.repository import EmergencyFundRepository
 from app.apps.emergency_fund.service import EmergencyFundService
-from app.apps.request_control.providers import get_idempotency_service, get_rate_limit_service
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
 
 def get_emergency_fund_repository() -> EmergencyFundRepository:
     return EmergencyFundRepository()

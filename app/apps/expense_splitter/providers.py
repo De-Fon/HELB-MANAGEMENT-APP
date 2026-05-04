@@ -1,7 +1,8 @@
 from fastapi import Depends
 from app.apps.expense_splitter.repository import ExpenseSplitterRepository
 from app.apps.expense_splitter.service import ExpenseSplitterService
-from app.apps.request_control.providers import get_idempotency_service, get_rate_limit_service
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
 
 def get_expense_splitter_repository() -> ExpenseSplitterRepository:
     return ExpenseSplitterRepository()

@@ -5,9 +5,12 @@ from app.core.database import get_db
 from app.apps.subscription_manager.schemas import SubscriptionResponse
 from app.apps.subscription_manager.service import SubscriptionService
 from app.apps.subscription_manager.providers import get_subscription_service
-from app.apps.request_control.dependencies import idempotent, rate_limit
-from app.apps.request_control.providers import get_request_control_service
-from app.apps.request_control.service import RequestControlService
+from app.apps.idempotency.dependencies import idempotent
+from app.apps.rate_limiting.dependencies import rate_limit
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
+from app.apps.idempotency.service import IdempotencyService
+from app.apps.rate_limiting.service import RateLimitService
 
 router = APIRouter()
 
@@ -23,7 +26,8 @@ def get_upcoming_subscriptions(
     user_id: int,
     db: Session = Depends(get_db),
     service: SubscriptionService = Depends(get_subscription_service),
-    rc_service: RequestControlService = Depends(get_request_control_service)
+    idempotency_service: IdempotencyService = Depends(get_idempotency_service),
+    rate_limit_service: RateLimitService = Depends(get_rate_limit_service)
 ):
     """
     Checks and alerts users about subscriptions renewing within the next 7 days.

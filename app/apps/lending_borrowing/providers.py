@@ -1,7 +1,8 @@
 from fastapi import Depends
 from app.apps.lending_borrowing.repository import LendingBorrowingRepository
 from app.apps.lending_borrowing.service import LendingBorrowingService
-from app.apps.request_control.providers import get_idempotency_service, get_rate_limit_service
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
 
 def get_lending_borrowing_repository() -> LendingBorrowingRepository:
     return LendingBorrowingRepository()

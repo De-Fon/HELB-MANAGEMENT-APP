@@ -1,7 +1,8 @@
 from fastapi import Depends
 from app.apps.budget_tracker.repository import BudgetAllocationRepository
 from app.apps.budget_tracker.service import BudgetAllocationService
-from app.apps.request_control.providers import get_idempotency_service, get_rate_limit_service
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
 
 def get_budget_allocation_repository() -> BudgetAllocationRepository:
     return BudgetAllocationRepository()

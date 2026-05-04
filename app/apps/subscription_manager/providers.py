@@ -1,7 +1,8 @@
 from fastapi import Depends
 from app.apps.subscription_manager.repository import SubscriptionRepository
 from app.apps.subscription_manager.service import SubscriptionService
-from app.apps.request_control.providers import get_idempotency_service, get_rate_limit_service
+from app.apps.idempotency.providers import get_idempotency_service
+from app.apps.rate_limiting.providers import get_rate_limit_service
 
 def get_subscription_repository() -> SubscriptionRepository:
     return SubscriptionRepository()
