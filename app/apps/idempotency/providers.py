@@ -11,3 +11,4 @@ def get_idempotency_service(
     repository: IdempotencyRepository = Depends(get_idempotency_repository)
 ) -> IdempotencyService:
     return IdempotencyService(repository)
+

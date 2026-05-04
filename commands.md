@@ -28,8 +28,11 @@ This file contains every command you might need to run for this project, categor
 # Start the server on a specific host and port
 # uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-# Run the server in production mode (No reload)
+# Start the server in production mode (No reload)
 # uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# Force stop the server if port 8000 is already in use
+# fuser -k 8000/tcp
 ```
 
 ## 3. Database Management (Alembic)
