@@ -5,6 +5,7 @@ from app.apps.auth.schemas import UserCreate, UserLogin
 from app.apps.auth.models import User
 from app.core.security import verify_password, create_access_token as generate_jwt
 from app.core.settings import settings
+from app.apps.auth.tasks import send_welcome_email_task
 
 class AuthService:
     def __init__(
@@ -26,6 +27,10 @@ class AuthService:
         try:
             user = self.repository.create_user(db, data)
             db.commit()
+            
+            # Trigger background welcome email
+            send_welcome_email_task.delay(user.email, user.username)
+            
             return user
         except Exception as e:
             db.rollback()

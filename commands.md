@@ -109,3 +109,15 @@ This file contains every command you might need to run for this project, categor
 # Push to origin
 # git push origin main
 ```
+
+## 8. Background Tasks (Celery & Redis)
+```bash
+# Start Redis Server (Ensure Redis is installed on your system)
+# redis-server
+
+# Start Celery Worker (Run this in a separate terminal)
+# celery -A app.core.celery_app worker --loglevel=info
+
+# Monitor Celery Tasks (requires 'flower' package)
+# celery -A app.core.celery_app flower
+```
