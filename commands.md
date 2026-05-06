@@ -112,12 +112,20 @@ This file contains every command you might need to run for this project, categor
 
 ## 8. Background Tasks (Celery & Redis)
 ```bash
-# Start Redis Server (Ensure Redis is installed on your system)
+# Start Redis Server manually (not recommended if installed via apt)
 # redis-server
+
+# Manage Redis as a background service (Recommended for Linux/Ubuntu)
+# sudo systemctl status redis-server
+# sudo systemctl restart redis-server
+# sudo systemctl stop redis-server
+
+# Verify Redis is running
+# redis-cli ping
 
 # Start Celery Worker (Run this in a separate terminal)
 # celery -A app.core.celery_app worker --loglevel=info
-
+./venv/bin/celery -A app.core.celery_app worker --loglevel=info
 # Monitor Celery Tasks (requires 'flower' package)
 # celery -A app.core.celery_app flower
 ```
