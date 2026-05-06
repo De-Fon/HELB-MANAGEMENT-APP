@@ -8,13 +8,10 @@ class ScholarshipService:
     def __init__(
         self, 
         repository: ScholarshipRepository,
-        idempotency_service=None,
-        rate_limit_service=None
+        idempotency_service=None
     ):
         self.repository = repository
         self.idempotency_service = idempotency_service
-        self.rate_limit_service = rate_limit_service
-
     def get_eligible_scholarships(self, db: Session, user_profile_data: Dict[str, Any]) -> List[Scholarship]:
         today = date.today()
         open_scholarships = self.repository.get_open_scholarships(db, today)

@@ -8,7 +8,6 @@ from app.apps.auth.repository import AuthRepository
 from app.apps.auth.service import AuthService
 from app.apps.auth.models import User
 from app.apps.idempotency.providers import get_idempotency_service
-from app.apps.rate_limiting.providers import get_rate_limit_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -17,13 +16,11 @@ def get_auth_repository() -> AuthRepository:
 
 def get_auth_service(
     repository: AuthRepository = Depends(get_auth_repository),
-    idempotency_service = Depends(get_idempotency_service, use_cache=True),
-    rate_limit_service = Depends(get_rate_limit_service, use_cache=True)
+    idempotency_service = Depends(get_idempotency_service, use_cache=True)
 ) -> AuthService:
     return AuthService(
         repository=repository,
-        idempotency_service=idempotency_service,
-        rate_limit_service=rate_limit_service
+        idempotency_service=idempotency_service
     )
 
 def get_current_user(

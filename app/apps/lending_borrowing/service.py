@@ -7,13 +7,10 @@ class LendingBorrowingService:
     def __init__(
         self, 
         repository: LendingBorrowingRepository,
-        idempotency_service=None,
-        rate_limit_service=None
+        idempotency_service=None
     ):
         self.repository = repository
         self.idempotency_service = idempotency_service
-        self.rate_limit_service = rate_limit_service
-
     def request_loan(self, db: Session, data: LoanCreate) -> Loan:
         # Business logic for loan requests
         loan = self.repository.create_loan_request(db, data)

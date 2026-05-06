@@ -8,13 +8,10 @@ class ExpenseSplitterService:
     def __init__(
         self, 
         repository: ExpenseSplitterRepository,
-        idempotency_service=None,
-        rate_limit_service=None
+        idempotency_service=None
     ):
         self.repository = repository
         self.idempotency_service = idempotency_service
-        self.rate_limit_service = rate_limit_service
-
     def split_expense(self, db: Session, data: SharedExpenseCreate):
         if not data.split_among_user_ids:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Must split among at least one user.")

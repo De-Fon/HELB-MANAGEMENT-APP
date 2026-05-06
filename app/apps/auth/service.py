@@ -11,13 +11,10 @@ class AuthService:
     def __init__(
         self, 
         repository: AuthRepository,
-        idempotency_service=None,
-        rate_limit_service=None
+        idempotency_service=None
     ):
         self.repository = repository
         self.idempotency_service = idempotency_service
-        self.rate_limit_service = rate_limit_service
-
     def register_user(self, db: Session, data: UserCreate) -> User:
         """
         Registers a new user. 

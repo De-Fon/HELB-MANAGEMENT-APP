@@ -7,13 +7,10 @@ class MpesaTransactionService:
     def __init__(
         self, 
         repository: MpesaTransactionRepository,
-        idempotency_service=None,
-        rate_limit_service=None
+        idempotency_service=None
     ):
         self.repository = repository
         self.idempotency_service = idempotency_service
-        self.rate_limit_service = rate_limit_service
-
     def sync_transactions(self, db: Session, user_id: int, transaction_list: List[MpesaTransactionImport]):
         """
         Syncs transactions by delegating deduplication and persistence to the repository.

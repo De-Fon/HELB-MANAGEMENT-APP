@@ -18,7 +18,14 @@ app = FastAPI(
 # ── 3. Register middleware (runs before routes) ───────────────────────────────
 app.add_middleware(RequestLoggingMiddleware)
 
-# ── 4. Register global exception handlers ─────────────────────────────────────
+# ── 4. Register SlowAPI rate limiter ──────────────────────────────────────────
+from app.core.rate_limiting import limiter, setup_rate_limit_exception_handler
+from slowapi.middleware import SlowAPIMiddleware
+app.state.limiter = limiter
+setup_rate_limit_exception_handler(app)
+app.add_middleware(SlowAPIMiddleware)
+
+# ── 5. Register global exception handlers ─────────────────────────────────────
 from app.shared.exceptions import setup_exception_handlers
 setup_exception_handlers(app)
 

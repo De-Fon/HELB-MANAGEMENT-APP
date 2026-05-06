@@ -6,13 +6,10 @@ class ExpenditureAnalyticsService:
     def __init__(
         self, 
         repository: ExpenditureAnalyticsRepository,
-        idempotency_service=None,
-        rate_limit_service=None
+        idempotency_service=None
     ):
         self.repository = repository
         self.idempotency_service = idempotency_service
-        self.rate_limit_service = rate_limit_service
-
     def generate_comparison_report(self, db: Session, user_id: int, month: int, year: int) -> ExpenditureReport:
         """
         Generates a comparison report. 

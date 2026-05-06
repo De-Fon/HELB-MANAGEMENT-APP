@@ -8,13 +8,10 @@ class FeedbackService:
     def __init__(
         self, 
         repository: FeedbackRepository,
-        idempotency_service=None,
-        rate_limit_service=None
+        idempotency_service=None
     ):
         self.repository = repository
         self.idempotency_service = idempotency_service
-        self.rate_limit_service = rate_limit_service
-
     def submit_feedback(self, db: Session, data: FeedbackCreate) -> StudentFeedback:
         # Validate user_id exists
         # Note: In a complete system, this would query the UserRepository.

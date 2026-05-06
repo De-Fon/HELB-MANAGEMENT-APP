@@ -8,13 +8,10 @@ class BudgetAllocationService:
     def __init__(
         self, 
         repository: BudgetAllocationRepository,
-        idempotency_service=None,
-        rate_limit_service=None
+        idempotency_service=None
     ):
         self.repository = repository
         self.idempotency_service = idempotency_service
-        self.rate_limit_service = rate_limit_service
-
     def allocate_budget(self, db: Session, data: BudgetAllocationCreate) -> BudgetAllocation:
         total_allocations = (
             data.rent_allocation +

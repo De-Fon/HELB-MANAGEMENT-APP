@@ -37,12 +37,16 @@ pip install -r requirements.txt
 ### 2. Configure Database
 Ensure PostgreSQL is running and update the `DATABASE_URL` in `.env`.
 
-### 3. Run Migrations
+### 3. Configure Redis
+Ensure Redis is running and set `REDIS_URL` plus `REDIS_RATE_LIMIT_URL` in `.env`.
+The rate limiter uses `REDIS_RATE_LIMIT_URL` so throttling keys stay separate from Celery or other Redis data.
+
+### 4. Run Migrations
 ```bash
 alembic upgrade head
 ```
 
-### 4. Run the Server
+### 5. Run the Server
 ```bash
 uvicorn app.main:app --reload
 ```
