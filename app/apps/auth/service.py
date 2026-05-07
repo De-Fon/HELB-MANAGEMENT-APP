@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from app.apps.auth.repository import AuthRepository
 from app.apps.auth.schemas import UserCreate, UserLogin
 from app.apps.auth.models import User
 from app.core.security import verify_password, create_access_token as generate_jwt
-from app.core.settings import settings
+from app.core.config import settings
 from app.apps.auth.tasks import send_welcome_email_task
 
 class AuthService:
@@ -21,6 +22,11 @@ class AuthService:
         Uses a robust 'Try-Create' pattern to handle potential race conditions
         on unique constraints (email/username).
         """
+        if self.repository.get_user_by_email(db, data.email):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+        if self.repository.get_user_by_username(db, data.username):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken")
+
         try:
             user = self.repository.create_user(db, data)
             db.commit()
@@ -29,16 +35,23 @@ class AuthService:
             send_welcome_email_task.delay(user.email, user.username)
             
             return user
-        except Exception as e:
+        except IntegrityError as e:
             db.rollback()
-            # Check if it's a unique constraint violation
-            error_msg = str(e).lower()
-            if "email" in error_msg:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+            constraint_name = getattr(getattr(e, "orig", None), "diag", None)
+            constraint_name = getattr(constraint_name, "constraint_name", "") or ""
+            error_msg = f"{constraint_name} {e.orig}".lower()
+
             if "username" in error_msg:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken")
+            if "email" in error_msg:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
             
-            # Generic error for other integrity issues
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail="Could not complete registration. Please try again."
+            )
+        except Exception:
+            db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
                 detail="Could not complete registration. Please try again."

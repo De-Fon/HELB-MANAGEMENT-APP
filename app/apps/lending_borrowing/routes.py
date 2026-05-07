@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, Request, Response
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.rate_limiting import limiter
-from app.apps.lending_borrowing.schemas import LoanCreate, LoanResponse
+from app.apps.lending_borrowing.schemas import LoanCreate, LoanRequestResponse
 from app.apps.lending_borrowing.service import LendingBorrowingService
 from app.apps.lending_borrowing.providers import get_lending_borrowing_service
 from app.apps.idempotency.dependencies import idempotent
@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.post(
     "/request",
-    response_model=LoanResponse,
+    response_model=LoanRequestResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Request a new loan"
 )

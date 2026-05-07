@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.core.settings import settings
+from app.core.config import settings
 from app.core.rate_limiting import limiter
 from app.apps.auth.schemas import UserCreate, UserResponse, UserLogin, TokenResponse
 from app.apps.auth.service import AuthService

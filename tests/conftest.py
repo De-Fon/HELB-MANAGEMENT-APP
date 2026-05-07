@@ -2,15 +2,19 @@
 conftest.py - Central test configuration.
 
 Strategy:
-- Uses a separate SQLite in-memory database so tests NEVER touch production PostgreSQL.
+- Uses a separate PostgreSQL test database so tests NEVER touch production data.
 - Overrides the `get_db` FastAPI dependency so all routes use the test session.
 - Provides reusable fixtures for: test client, registered user, and auth token.
 """
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 from app.main import app
 from app.core.database import Base, get_db

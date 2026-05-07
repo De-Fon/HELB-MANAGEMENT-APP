@@ -10,7 +10,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from loguru import logger
 
-from app.core.settings import settings
+from app.core.config import settings
 
 # Initialize SlowAPI Limiter with Redis backend
 # Uses Remote Address as the key function (IP-based rate limiting by default)

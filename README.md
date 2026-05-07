@@ -35,7 +35,7 @@ pip install -r requirements.txt
 ```
 
 ### 2. Configure Database
-Ensure PostgreSQL is running and update the `DATABASE_URL` in `.env`.
+Ensure PostgreSQL is running and update `DATABASE_URL`, `JWT_SECRET`, and `SMS_API_KEY` in `.env`.
 
 ### 3. Configure Redis
 Ensure Redis is running and set `REDIS_URL` plus `REDIS_RATE_LIMIT_URL` in `.env`.

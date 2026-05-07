@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from app.core.settings import settings
+from fastapi import FastAPI, Request
+from app.core.config import settings
 from app.core.logging import setup_logging
 from app.shared.middleware import RequestLoggingMiddleware
 
@@ -14,6 +14,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url="/openapi.json"
 )
+app.state.settings = settings
 
 # ── 3. Register middleware (runs before routes) ───────────────────────────────
 app.add_middleware(RequestLoggingMiddleware)
@@ -31,9 +32,10 @@ setup_exception_handlers(app)
 
 # ── 5. Health check ───────────────────────────────────────────────────────────
 @app.get("/health", tags=["Health"])
-def health_check():
+def health_check(request: Request):
     """Health check endpoint."""
-    return {"status": "ok", "project": settings.PROJECT_NAME}
+    app_settings = request.app.state.settings
+    return {"status": "ok", "project": app_settings.PROJECT_NAME}
 
 # ── 6. Register all feature routers ──────────────────────────────────────────
 from app.apps.budget_tracker.routes import router as budget_router
