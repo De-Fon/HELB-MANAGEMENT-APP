@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from loguru import logger
-from app.core.config import settings
+from app.core.settings import settings
 
 # Create SQLAlchemy engine
 engine = create_engine(settings.DATABASE_URL)

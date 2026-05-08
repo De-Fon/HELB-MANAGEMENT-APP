@@ -5,7 +5,7 @@ from app.apps.auth.repository import AuthRepository
 from app.apps.auth.schemas import UserCreate, UserLogin
 from app.apps.auth.models import User
 from app.core.security import verify_password, create_access_token as generate_jwt
-from app.core.config import settings
+from app.core.settings import settings
 from app.apps.auth.tasks import send_welcome_email_task
 
 class AuthService:

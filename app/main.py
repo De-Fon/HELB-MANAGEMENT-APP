@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from app.core.config import settings
+from app.core.settings import settings
 from app.core.logging import setup_logging
 from app.shared.middleware import RequestLoggingMiddleware
 

@@ -1,6 +1,6 @@
 import os
 from celery import Celery
-from app.core.config import settings
+from app.core.settings import settings
 
 # Create the Celery instance
 # 'app' is the name of the main module (app/)
