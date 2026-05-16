@@ -14,9 +14,9 @@ class BudgetAllocationService:
         self.idempotency_service = idempotency_service
     def allocate_budget(self, db: Session, data: BudgetAllocationCreate) -> BudgetAllocation:
         total_allocations = (
-            data.rent_allocation -
-            data.food_allocation -
-            data.transport_allocation -
+            data.rent_allocation +
+            data.food_allocation +
+            data.transport_allocation +
             data.personal_needs_allocation
         )
 
